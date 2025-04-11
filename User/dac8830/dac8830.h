@@ -7,10 +7,10 @@
 #define VREF 2500.0
 
 /* 电压量程选择 跳帽接5V：0  跳帽接10V：1*/
-#define VOLTAGE_RANGE 1
+#define VOLTAGE_RANGE 0
 
 /* 电压输出模式 跳帽接0~+：0  跳帽接-~+：1*/
-#define VOLTAGE_OUTPUT_MODE 1
+#define VOLTAGE_OUTPUT_MODE 0
 
 /* 不同模式的电压范围 用户无需修改 */
 #if VOLTAGE_RANGE

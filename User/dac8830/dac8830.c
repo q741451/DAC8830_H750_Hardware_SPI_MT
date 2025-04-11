@@ -14,8 +14,6 @@ static void DAC8830_SPI_Write(uint16_t data) {
   HAL_GPIO_WritePin(DAC8830_CS1_GPIO_Port, DAC8830_CS1_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(DAC8830_CS2_GPIO_Port, DAC8830_CS2_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(&hspi6, spi_data, sizeof(spi_data), 1000);
-  /* 等待DAC数据更新 */
-  HAL_Delay(1);
   HAL_GPIO_WritePin(DAC8830_CS1_GPIO_Port, DAC8830_CS1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(DAC8830_CS2_GPIO_Port, DAC8830_CS2_Pin, GPIO_PIN_SET);
 }
