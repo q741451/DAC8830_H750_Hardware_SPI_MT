@@ -87,9 +87,9 @@ typedef enum {
 //-----------------------------------------------------------------
 // 外部函数声明
 //-----------------------------------------------------------------
-extern void KEY_Init(void);
-extern void BSP_KEY_Init(Button_TypeDef button);
-extern u8 KEY_Scan(u8 mode);
+void KEY_Init(void);
+void BSP_KEY_Init(Button_TypeDef button);
+u8 KEY_get(uint32_t ms);
 //-----------------------------------------------------------------
 #endif
 //-----------------------------------------------------------------

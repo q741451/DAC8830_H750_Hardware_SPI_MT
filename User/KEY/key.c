@@ -17,7 +17,8 @@
 // 头文件包含
 //-----------------------------------------------------------------
 #include "key.h"
-#include "delay.h"
+#include "DWT.h"
+
 //-----------------------------------------------------------------
 
 GPIO_TypeDef *BUTTON_PORT[BUTTONn] = {
@@ -66,35 +67,62 @@ void BSP_KEY_Init(Button_TypeDef button) {
 }
 
 //-----------------------------------------------------------------
-// u8 KEY_Scan(u8 mode)
+// u8 KEY_get(uint32_t ms)
 //-----------------------------------------------------------------
 //
-// 函数功能: 独立键盘扫描
-// 入口参数: u8 mode：0不支持连续按，1支持连续按;
+// 函数功能: 扫描按键按下
+// 入口参数: ms - 监视时间，单位毫秒，0表示永久等待
 // 返回参数: 按键值
 // 注意事项: 此函数有响应优先级,KEY1>KEY2>KEY3>KEY4!!
 //
 //-----------------------------------------------------------------
-u8 KEY_Scan(u8 mode) {
-  static u8 key_up = 1; // 按键松开标志
-  if (mode == 1)        // 支持连按
-    key_up = 1;
-  if (key_up &&
-      (KEY1 == 0 || KEY2 == 0 || KEY3 == 0 || KEY4 == 0)) // 有按键按下
-  {
-    delay_ms(10);  // 延时10ms
-    key_up = 0;    // 按键松开标志置零
-    if (KEY1 == 0) // 按键K1按下
-      return KEY1_PRES;
-    else if (KEY2 == 0) // 按键K2按下
-      return KEY2_PRES;
-    else if (KEY3 == 0) // 按键K3按下
-      return KEY3_PRES;
-    else if (KEY4 == 0) // 按键K4按下
-      return KEY4_PRES;
-  } else if (KEY1 == 1 && KEY2 == 1 && KEY3 == 1 && KEY4 == 01) // 无按键按下
-    key_up = 1;
-  return 0; // 无按键按下
+u8 KEY_get(uint32_t ms)
+{
+	GPIO_PinState gpLast_KEY1 = KEY1;
+	GPIO_PinState gpLast_KEY2 = KEY2;
+	GPIO_PinState gpLast_KEY3 = KEY3;
+	GPIO_PinState gpLast_KEY4 = KEY4;
+	uint32_t uStartTime = HAL_GetTick();
+	
+	while(1)
+	{
+		if(gpLast_KEY1 == GPIO_PIN_RESET)
+		{
+			if(KEY1 == GPIO_PIN_SET)
+				return KEY1_PRES;
+		}
+		else
+			gpLast_KEY1 = KEY1;
+			
+		if(gpLast_KEY2 == GPIO_PIN_RESET)
+		{
+			if(KEY2 == GPIO_PIN_SET)
+				return KEY2_PRES;
+		}
+		else
+			gpLast_KEY2 = KEY2;
+		
+		if(gpLast_KEY3 == GPIO_PIN_RESET)
+		{
+			if(KEY3 == GPIO_PIN_SET)
+				return KEY3_PRES;
+		}
+		else
+			gpLast_KEY3 = KEY3;
+		
+		if(gpLast_KEY4 == GPIO_PIN_RESET)
+		{
+			if(KEY4 == GPIO_PIN_SET)
+				return KEY4_PRES;
+		}
+		else
+			gpLast_KEY4 = KEY4;
+		
+		if(ms > 0 && HAL_GetTick() - uStartTime > ms)
+			break;
+	}
+
+  return 0;
 }
 //-----------------------------------------------------------------
 // End Of File

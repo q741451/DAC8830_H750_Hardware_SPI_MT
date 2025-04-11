@@ -27,53 +27,28 @@
 // 头文件包含
 //-----------------------------------------------------------------
 #include "dac8830.h"
-#include "delay.h"
 #include "key.h"
 #include "system.h"
+#include "DWT.h"
 #include <math.h>
 #include <string.h>
 
-#define OUTPUT_DC 0
-#define OUTPUT_WAVE 1
 //-----------------------------------------------------------------
 //-----------------------------------------------------------------
 // 主程序
 //-----------------------------------------------------------------
 int main(void) {
   double voltage = MAX_VOLTAGE;
-  uint8_t mode = OUTPUT_DC;
   CPU_CACHE_Enable();      // 启用CPU缓存
   HAL_Init();              // 初始化HAL库
   MPU_Memory_Protection(); // 设置保护区域
   SystemClock_Config();    // 设置系统时钟,400Mhz
-  SysTick_clkconfig(400);  // SysTick参数配置
+	DWT_Init();
   KEY_Init();              // 按键初始化
   DAC8830_Init();
-  /* 获取波形数据 */
-  double data_wave[32] = {0};
-  double temp_f = 2 * 3.1415926535 / (sizeof(data_wave) / sizeof(double));
-  for (int i = 0; i < sizeof(data_wave) / sizeof(double); i++) {
-#if VOLTAGE_RANGE
-#if VOLTAGE_OUTPUT_MODE
-    /* 跳帽接10V ±10V输出 20VPP */
-    data_wave[i] = MAX_VOLTAGE * sin(temp_f * i);
-#else
-    /* 跳帽接10V 0V-10V输出 10VPP */
-    data_wave[i] = (MAX_VOLTAGE / 2) * sin(temp_f * i) + (MAX_VOLTAGE / 2);
-#endif
-#else
-#if VOLTAGE_OUTPUT_MODE
-    /* 跳帽接5V ±5V输出 10VPP */
-    data_wave[i] = MAX_VOLTAGE * sin(temp_f * i);
-#else
-    /* 跳帽接5V 0V-5V输出 5VPP */
-    data_wave[i] = (MAX_VOLTAGE / 2) * sin(temp_f * i) + (MAX_VOLTAGE / 2);
-#endif
-#endif
-  }
 
   while (1) {
-    switch (KEY_Scan(0)) {
+    switch (KEY_get(0)) {
     case KEY1_PRES:
       voltage += 1.0;
       if (voltage > MAX_VOLTAGE) {
@@ -86,21 +61,9 @@ int main(void) {
         voltage = MAX_VOLTAGE;
       }
       break;
-    case KEY3_PRES:
-      if (mode == OUTPUT_DC) {
-        mode = OUTPUT_WAVE;
-      } else if (mode == OUTPUT_WAVE) {
-        mode = OUTPUT_DC;
-      }
-      break;
     }
-    if (mode == OUTPUT_DC) {
-      /* 直流输出 */
-      DAC8830_Set_Direct_Current(voltage);
-    } else if (mode == OUTPUT_WAVE) {
-      /* 波形输出 */
-      DAC8830_Set_Wave(data_wave, sizeof(data_wave) / sizeof(double));
-    }
+
+		DAC8830_Set_Direct_Current(voltage);
   }
 }
 
