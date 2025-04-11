@@ -28,6 +28,7 @@
 //-----------------------------------------------------------------
 #include "dac8830.h"
 #include "key.h"
+#include "LED.h"
 #include "system.h"
 #include "DWT.h"
 #include <math.h>
@@ -38,15 +39,28 @@
 // 主程序
 //-----------------------------------------------------------------
 int main(void) {
-  double voltage = MAX_VOLTAGE;
+  double voltage = 0;
   CPU_CACHE_Enable();      // 启用CPU缓存
   HAL_Init();              // 初始化HAL库
   MPU_Memory_Protection(); // 设置保护区域
   SystemClock_Config();    // 设置系统时钟,400Mhz
-	DWT_Init();
+  DWT_Init();
   KEY_Init();              // 按键初始化
+  LED_Init();              // 初始化LED
   DAC8830_Init();
 
+  DAC8830_Set_Direct_Current(voltage, DAC8830_CS1 | DAC8830_CS2);
+
+  LED_B_OFF;
+  LED_G_OFF;
+  LED_R_ON;
+
+  HAL_Delay(1000);
+
+  LED_B_ON;
+  LED_G_OFF;
+  LED_R_ON;
+  
   while (1) {
     switch (KEY_get(0)) {
     case KEY1_PRES:
@@ -61,10 +75,17 @@ int main(void) {
         voltage = MAX_VOLTAGE;
       }
       break;
+    case KEY3_PRES:
+      goto end;
     }
 
-		DAC8830_Set_Direct_Current(voltage);
+    DAC8830_Set_Direct_Current(voltage, DAC8830_CS1);
   }
+
+end:
+  LED_B_OFF;
+  LED_G_ON;
+  LED_R_OFF;
 }
 
 //-----------------------------------------------------------------

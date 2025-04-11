@@ -35,8 +35,10 @@
 #endif
 #endif
 
+#define DAC8830_CS1 1
+#define DAC8830_CS2 (1<<1)
+
 void DAC8830_Init(void);
-void DAC8830_Set_Direct_Current(double voltage);
-void DAC8830_Set_Wave(double *data, uint16_t data_size);
+void DAC8830_Set_Direct_Current(double voltage, uint8_t cs_mask);
 
 #endif
