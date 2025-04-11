@@ -29,7 +29,6 @@
 #include "dac8830.h"
 #include "delay.h"
 #include "key.h"
-#include "lcd.h"
 #include "system.h"
 #include <math.h>
 #include <string.h>
@@ -41,7 +40,6 @@
 // 主程序
 //-----------------------------------------------------------------
 int main(void) {
-  char buf[20] = {0};
   double voltage = MAX_VOLTAGE;
   uint8_t mode = OUTPUT_DC;
   CPU_CACHE_Enable();      // 启用CPU缓存
@@ -50,11 +48,6 @@ int main(void) {
   SystemClock_Config();    // 设置系统时钟,400Mhz
   SysTick_clkconfig(400);  // SysTick参数配置
   KEY_Init();              // 按键初始化
-  LCD_Init();              // LCD初始化
-  LCD_ShowString(0, 0, 464, 16, 16, "STM32 DAC8830 Test:");
-  POINT_COLOR = RED; // 笔画颜色
-  LCD_ShowString(0, 16, 464, 16, 16, "K1 +1.0V  K2 -1.0V");
-  LCD_ShowString(0, 32, 464, 16, 16, "K3 switch mode: DC");
   DAC8830_Init();
   /* 获取波形数据 */
   double data_wave[32] = {0};
@@ -96,18 +89,12 @@ int main(void) {
     case KEY3_PRES:
       if (mode == OUTPUT_DC) {
         mode = OUTPUT_WAVE;
-        LCD_ShowString(0, 32, 464, 16, 16, "K3 switch mode: WAVE");
-        LCD_ShowString(0, 48, 464, 16, 16, "                 ");
       } else if (mode == OUTPUT_WAVE) {
         mode = OUTPUT_DC;
-        LCD_ShowString(0, 32, 464, 16, 16, "K3 switch mode: DC  ");
       }
       break;
     }
     if (mode == OUTPUT_DC) {
-      LCD_ShowString(0, 48, 464, 16, 16, "DC value:");
-      sprintf(buf, "%.2f v ", voltage);
-      LCD_ShowString(80, 48, 464, 16, 16, buf);
       /* 直流输出 */
       DAC8830_Set_Direct_Current(voltage);
     } else if (mode == OUTPUT_WAVE) {
