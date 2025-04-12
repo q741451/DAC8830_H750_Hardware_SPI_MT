@@ -5,11 +5,9 @@
 extern "C" {
 #  endif
 
-typedef struct _MT_Procedure_CTX
-{
-  double c_parm;
-} MT_Procedure_CTX;
+void MT_Procedure1(void);
 
+void MT_Procedure2(void);
 
 
 #  ifdef  __cplusplus

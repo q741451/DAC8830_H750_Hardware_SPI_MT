@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------
-// ³ÌĞòÃèÊö:
-//    DAC8830Ó²¼şSPI ÊµÑé
-// ×÷    Õß: ÁèÖÇµç×Ó
-// ¿ªÊ¼ÈÕÆÚ: 2024-04-20
-// Íê³ÉÈÕÆÚ: 2024-04-20
-//   - V1.0:  DAC8830Ó²¼şSPI ÊµÑé
-// µ÷ÊÔ¹¤¾ß: ÁèÖÇSTM32ºËĞÄ¿ª·¢°å¡¢LZE_ST LINK2¡¢2.8´çÒº¾§¡¢DA8830Ä£¿é
-// Ëµ    Ã÷:
+// ç¨‹åºæè¿°:
+//    DAC8830ç¡¬ä»¶SPI å®éªŒ
+// ä½œ    è€…: å‡Œæ™ºç”µå­
+// å¼€å§‹æ—¥æœŸ: 2024-04-20
+// å®Œæˆæ—¥æœŸ: 2024-04-20
+//   - V1.0:  DAC8830ç¡¬ä»¶SPI å®éªŒ
+// è°ƒè¯•å·¥å…·: å‡Œæ™ºSTM32æ ¸å¿ƒå¼€å‘æ¿ã€LZE_ST LINK2ã€2.8å¯¸æ¶²æ™¶ã€DA8830æ¨¡å—
+// è¯´    æ˜:
 // STM32H750         DA8830
 //    5V                +5V
 //    GND               GND
@@ -15,16 +15,16 @@
 //    PA7               SDIO
 //    PA4              CS2
 //
-//  DAC8830ÓĞ4ÖÖÊä³öÄ£Ê½¡£Í¨¹ı¸Ä±äÌøÃ±¸Ä±äÄ£Ê½¡£
-//  µ±¸Ä±äÌøÃ±ºó£¬ĞèÒªĞŞ¸Ä³ÌĞòµÄºê¶¨Òå¡£ºê¶¨ÒåÎ»ÓÚdac8830.hÎÄ¼şÖĞ¡£
-//  /* µçÑ¹Á¿³ÌÑ¡Ôñ ÌøÃ±½Ó5V£º0  ÌøÃ±½Ó10V£º1*/
+//  DAC8830æœ‰4ç§è¾“å‡ºæ¨¡å¼ã€‚é€šè¿‡æ”¹å˜è·³å¸½æ”¹å˜æ¨¡å¼ã€‚
+//  å½“æ”¹å˜è·³å¸½åï¼Œéœ€è¦ä¿®æ”¹ç¨‹åºçš„å®å®šä¹‰ã€‚å®å®šä¹‰ä½äºdac8830.hæ–‡ä»¶ä¸­ã€‚
+//  /* ç”µå‹é‡ç¨‹é€‰æ‹© è·³å¸½æ¥5Vï¼š0  è·³å¸½æ¥10Vï¼š1*/
 //  #define VOLTAGE_RANGE 0
 //
-//  /* µçÑ¹Êä³öÄ£Ê½ ÌøÃ±½Ó0~+£º0  ÌøÃ±½Ó-~+£º1*/
+//  /* ç”µå‹è¾“å‡ºæ¨¡å¼ è·³å¸½æ¥0~+ï¼š0  è·³å¸½æ¥-~+ï¼š1*/
 //  #define VOLTAGE_OUTPUT_MODE 1
 //
 //-----------------------------------------------------------------
-// Í·ÎÄ¼ş°üº¬
+// å¤´æ–‡ä»¶åŒ…å«
 //-----------------------------------------------------------------
 #include "dac8830.h"
 #include "key.h"
@@ -34,59 +34,52 @@
 #include "DWT.h"
 #include "MT_Procedure.h"
 
-void call_back_irq2(void *user_env)
-{
-  LED_G_Toggle;
-}
 
-void call_back_irq3(void *user_env)
-{
-  LED_R_Toggle;
-}
+void call_back_btn1(void *user_env);
 
 //-----------------------------------------------------------------
 //-----------------------------------------------------------------
-// Ö÷³ÌĞò
+// ä¸»ç¨‹åº
 //-----------------------------------------------------------------
 int main(void) {
-  double voltage = 0;
-  CPU_CACHE_Enable();      // ÆôÓÃCPU»º´æ
-  HAL_Init();              // ³õÊ¼»¯HAL¿â
-  MPU_Memory_Protection(); // ÉèÖÃ±£»¤ÇøÓò
-  SystemClock_Config();    // ÉèÖÃÏµÍ³Ê±ÖÓ,400Mhz
+  CPU_CACHE_Enable();      // å¯ç”¨CPUç¼“å­˜
+  HAL_Init();              // åˆå§‹åŒ–HALåº“
+  MPU_Memory_Protection(); // è®¾ç½®ä¿æŠ¤åŒºåŸŸ
+  SystemClock_Config();    // è®¾ç½®ç³»ç»Ÿæ—¶é’Ÿ,400Mhz
   DWT_Init();
   BSP_KEY_Init(BUTTON_KEY1);
-  EXTI_Init(EXTI_KEY2 | EXTI_KEY3);
-  LED_Init();              // ³õÊ¼»¯LED
+  EXTI_Init(EXTI_KEY1);
+	EXTI_Register(EXTI_KEY1, call_back_btn1, NULL);
+  LED_Init();              // åˆå§‹åŒ–LED
   DAC8830_Init();
-  
-  LED_R_OFF;
-  LED_G_OFF;
-  LED_B_ON;
-  
-  while(KEY_get(0) != KEY1_PRES);
-  
-  LED_R_OFF;
+
+	// çº¢ - åœæ­¢
+  LED_R_ON;
   LED_G_OFF;
   LED_B_OFF;
+	
+	DAC8830_Set_Direct_Current(0, DAC8830_CS1 | DAC8830_CS2);
   
-  EXTI_Register(EXTI_KEY2, call_back_irq2, NULL);
-  EXTI_Register(EXTI_KEY3, call_back_irq3, NULL);
+  while(KEY_get(0) != KEY1_PRES);  // ç­‰å¾…å¼€å§‹
+  
+	// çº¢è“ - æ­£åœ¨å·¥ä½œ
+  LED_R_ON;
+  LED_G_OFF;
+  LED_B_ON;
 
-  DAC8830_Set_Direct_Current(voltage, DAC8830_CS1 | DAC8830_CS2);
+	MT_Procedure1();
+  MT_Procedure2();
 
-  while (1)
-  {
-    DWT_Delay_ms64(100000);
-    voltage += 1.0;
-    if (voltage > MAX_VOLTAGE)
-      voltage = MIN_VOLTAGE;
+	// ç»¿ - å·²å®Œæˆ
+  LED_R_OFF;
+  LED_G_ON;
+  LED_B_OFF;
 
-    DAC8830_Set_Direct_Current(voltage, DAC8830_CS1);
-  }
-
+	while(1){}
 }
 
-//-----------------------------------------------------------------
-// End Of File
-//-----------------------------------------------------------------
+// ä¸­æ–­æš‚æ—¶ä¸ç”¨ï¼Œä¹Ÿæœªè®°å½•æ—¶é—´æ¶ˆé™¤æŠ–åŠ¨
+void call_back_btn1(void *user_env)
+{
+
+}
