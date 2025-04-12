@@ -10,10 +10,6 @@
 //  - V1.0: (2020-11-11)外部中断初始化，中断时执行相应的事情
 // 调试工具: 凌智STM32H750核心板、LZE_ST_LINK2
 // 说    明: 通过按键来实现外部中断，每按一次按键就会触发一次中断；
-//            按键K1：关闭或点亮蓝灯
-//            按键K2：关闭或点亮绿灯
-//            按键K3：关闭或点亮红灯
-//            按键K4：关闭所有灯
 //
 //-----------------------------------------------------------------
 
@@ -22,166 +18,125 @@
 //-----------------------------------------------------------------
 #include "exti.h"
 #include "DWT.h"
-#include "led.h"
 //-----------------------------------------------------------------
 
-//-----------------------------------------------------------------
-// void EXTI_Init(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 外部中断初始化
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI_Init(void)
+void EXTI_Init(uint32_t keyMask)
 {
   GPIO_InitTypeDef GPIO_Initure;
   
   __HAL_RCC_GPIOE_CLK_ENABLE();             // 开启GPIOE时钟
+
+  GPIO_Initure.Pin = 0;
   
-  // PE0 PE1 PE2 PE3
-  GPIO_Initure.Pin=GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;                
+  if(keyMask & EXTI_KEY1) GPIO_Initure.Pin |= GPIO_PIN_0;
+  if(keyMask & EXTI_KEY2) GPIO_Initure.Pin |= GPIO_PIN_1;
+  if(keyMask & EXTI_KEY3) GPIO_Initure.Pin |= GPIO_PIN_2;
+  if(keyMask & EXTI_KEY4) GPIO_Initure.Pin |= GPIO_PIN_3;
+  
   GPIO_Initure.Mode=GPIO_MODE_IT_FALLING;   // 下升沿触发
   GPIO_Initure.Pull=GPIO_PULLUP;            // 上拉
+  
   HAL_GPIO_Init(GPIOE,&GPIO_Initure);
-
-  // 中断线0-PE0
-  HAL_NVIC_SetPriority(EXTI0_IRQn,1,0);    // 抢占优先级为1，子优先级为0
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);          // 使能中断线0
   
-  // 中断线1-PE1
-  HAL_NVIC_SetPriority(EXTI1_IRQn,1,1);    // 抢占优先级为1，子优先级为1
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);          // 使能中断线1
-  
-  // 中断线2-PE2
-  HAL_NVIC_SetPriority(EXTI2_IRQn,2,0);    // 抢占优先级为2，子优先级为0
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);          // 使能中断线2
-  
-  // 中断线3-PE3
-  HAL_NVIC_SetPriority(EXTI3_IRQn,2,1);    // 抢占优先级为2，子优先级为1
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);          // 使能中断线3
-}
-
-//-----------------------------------------------------------------
-// void EXTI0_IRQHandler(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断线0中断服务函数，调用中断处理公用函数
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI0_IRQHandler(void)
-{
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);// 调用中断处理公用函数
-}
-
-//-----------------------------------------------------------------
-// void EXTI1_IRQHandler(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断线1中断服务函数，调用中断处理公用函数
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI1_IRQHandler(void)
-{ 
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);// 调用中断处理公用函数
-}
-
-//-----------------------------------------------------------------
-// void EXTI2_IRQHandler(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断线2中断服务函数，调用中断处理公用函数
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI2_IRQHandler(void)
-{
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);// 调用中断处理公用函数
-}
-
-//-----------------------------------------------------------------
-// void EXTI3_IRQHandler(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断线3中断服务函数，调用中断处理公用函数
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI3_IRQHandler(void)
-{
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);// 调用中断处理公用函数
-}
-
-//-----------------------------------------------------------------
-// void EXTI4_IRQHandler(void)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断线4中断服务函数，调用中断处理公用函数
-// 入口参数: 无
-// 返回参数: 无
-// 注意事项: 无
-//
-//-----------------------------------------------------------------
-void EXTI4_IRQHandler(void)
-{
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);// 调用中断处理公用函数
-}
-
-//-----------------------------------------------------------------
-// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-//-----------------------------------------------------------------
-//
-// 函数功能: 中断服务程序中需要做的事情
-// 入口参数: uint16_t GPIO_Pin：中断引脚
-// 返回参数: 无
-// 注意事项: 在HAL库中所有的外部中断服务函数都会调用此函数
-//
-//-----------------------------------------------------------------
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  DWT_Delay_ms(10);      // 消抖
-  switch(GPIO_Pin)
+  if(keyMask & EXTI_KEY1)
   {
-    case GPIO_PIN_0:
-        if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_0)==0)  // LED_B翻转
-        {
-          LED_B_Toggle;
-        }
-        break;
-    case GPIO_PIN_1:
-        if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_1)==0)  // LED_G翻转
-        {
-          LED_G_Toggle;
-        }
-        break;
-    case GPIO_PIN_2:
-        if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_2)==0)  // LED_R翻转
-        {
-          LED_R_Toggle;
-        }
-        break;
-    case GPIO_PIN_3:
-        if(HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_3)==0)  // 关闭所有灯
-        {
-          LED_B_OFF;
-          LED_G_OFF;
-          LED_R_OFF;
-        }
-        break;
+    HAL_NVIC_SetPriority(EXTI0_IRQn,1,0);
+    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+  }
+  if(keyMask & EXTI_KEY2)
+  {
+    HAL_NVIC_SetPriority(EXTI1_IRQn,1,1);
+    HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+  }
+  if(keyMask & EXTI_KEY3)
+  {
+    HAL_NVIC_SetPriority(EXTI2_IRQn,2,0);
+    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+  }
+  if(keyMask & EXTI_KEY4)
+  {
+    HAL_NVIC_SetPriority(EXTI3_IRQn,2,1);
+    HAL_NVIC_EnableIRQ(EXTI3_IRQn);
   }
 }
+
+EXTI_IRQHandler_Callback EXTI_callback0 = NULL;
+EXTI_IRQHandler_Callback EXTI_callback1 = NULL;
+EXTI_IRQHandler_Callback EXTI_callback2 = NULL;
+EXTI_IRQHandler_Callback EXTI_callback3 = NULL;
+
+void *EXTI_callback0_user = NULL;
+void *EXTI_callback1_user = NULL;
+void *EXTI_callback2_user = NULL;
+void *EXTI_callback3_user = NULL;
+
+void EXTI_Register(uint32_t keyMask, EXTI_IRQHandler_Callback callback, void *user_env)
+{
+  if(keyMask & EXTI_KEY1)
+  {
+    EXTI_callback0 = callback;
+    EXTI_callback0_user = user_env;
+  }
+  if(keyMask & EXTI_KEY2)
+  {
+    EXTI_callback1 = callback;
+    EXTI_callback1_user = user_env;
+  }
+  if(keyMask & EXTI_KEY3)
+  {
+    EXTI_callback2 = callback;
+    EXTI_callback2_user = user_env;
+  }
+  if(keyMask & EXTI_KEY4)
+  {
+    EXTI_callback3 = callback;
+    EXTI_callback3_user = user_env;
+  }
+}
+
+void EXTI0_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
+
+void EXTI1_IRQHandler(void)
+{ 
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+}
+
+void EXTI2_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
+
+void EXTI3_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  switch(GPIO_Pin)
+  {
+  case GPIO_PIN_0:
+      if (EXTI_callback0)
+        EXTI_callback0(EXTI_callback0_user);
+      break;
+  case GPIO_PIN_1:
+      if (EXTI_callback1)
+        EXTI_callback1(EXTI_callback1_user);
+      break;
+  case GPIO_PIN_2:
+      if (EXTI_callback2)
+        EXTI_callback2(EXTI_callback2_user);
+      break;
+  case GPIO_PIN_3:
+      if (EXTI_callback3)
+        EXTI_callback3(EXTI_callback3_user);
+      break;
+  }
+}
+
 //-----------------------------------------------------------------
 // End Of File
 //-----------------------------------------------------------------

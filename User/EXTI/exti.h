@@ -16,10 +16,18 @@
 #define _EXTI_H
 #include "system.h"
 
+typedef void (*EXTI_IRQHandler_Callback)(void *user_env);
+
+#define EXTI_KEY1 1
+#define EXTI_KEY2 (1<<1)
+#define EXTI_KEY3 (1<<2)
+#define EXTI_KEY4 (1<<3)
+
 //-----------------------------------------------------------------
 // 外部函数声明
 //-----------------------------------------------------------------
-void EXTI_Init(void);
+void EXTI_Init(uint32_t keyMask);
+void EXTI_Register(uint32_t keyMask, EXTI_IRQHandler_Callback callback, void *user_env);
 //-----------------------------------------------------------------
 
 #endif

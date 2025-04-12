@@ -35,6 +35,16 @@
 #include <math.h>
 #include <string.h>
 
+void call_back_irq2(void *user_env)
+{
+  LED_G_Toggle;
+}
+
+void call_back_irq3(void *user_env)
+{
+  LED_R_Toggle;
+}
+
 //-----------------------------------------------------------------
 //-----------------------------------------------------------------
 // 主程序
@@ -46,17 +56,29 @@ int main(void) {
   MPU_Memory_Protection(); // 设置保护区域
   SystemClock_Config();    // 设置系统时钟,400Mhz
   DWT_Init();
-  // BSP_KEY_Init(BUTTON_KEY1);
-  // BSP_KEY_Init(BUTTON_KEY2);
-	EXTI_Init();
+  BSP_KEY_Init(BUTTON_KEY1);
+  EXTI_Init(EXTI_KEY2 | EXTI_KEY3);
   LED_Init();              // 初始化LED
   DAC8830_Init();
+  
+  LED_R_OFF;
+  LED_G_OFF;
+  LED_B_ON;
+  
+  while(KEY_get(0) != KEY1_PRES);
+  
+  LED_R_OFF;
+  LED_G_OFF;
+  LED_B_OFF;
+  
+  EXTI_Register(EXTI_KEY2, call_back_irq2, NULL);
+  EXTI_Register(EXTI_KEY3, call_back_irq3, NULL);
 
   DAC8830_Set_Direct_Current(voltage, DAC8830_CS1 | DAC8830_CS2);
 
   while (1)
-	{
-		DWT_Delay_ms(2000);
+  {
+    DWT_Delay_ms(2000);
     voltage += 1.0;
     if (voltage > MAX_VOLTAGE)
       voltage = MIN_VOLTAGE;
