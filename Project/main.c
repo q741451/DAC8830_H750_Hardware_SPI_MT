@@ -45,7 +45,8 @@ int main(void) {
   MPU_Memory_Protection(); // 设置保护区域
   SystemClock_Config();    // 设置系统时钟,400Mhz
   DWT_Init();
-  KEY_Init();              // 按键初始化
+  BSP_KEY_Init(BUTTON_KEY1);
+  BSP_KEY_Init(BUTTON_KEY2);
   LED_Init();              // 初始化LED
   DAC8830_Init();
 
@@ -55,7 +56,7 @@ int main(void) {
   LED_G_OFF;
   LED_R_ON;
 
-  HAL_Delay(1000);
+  while(KEY_get(0) != KEY1_PRES);
 
   LED_B_ON;
   LED_G_OFF;
@@ -86,6 +87,7 @@ end:
   LED_B_OFF;
   LED_G_ON;
   LED_R_OFF;
+  while(1){}
 }
 
 //-----------------------------------------------------------------
