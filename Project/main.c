@@ -32,8 +32,7 @@
 #include "LED.h"
 #include "system.h"
 #include "DWT.h"
-#include <math.h>
-#include <string.h>
+#include "MT_Procedure.h"
 
 void call_back_irq2(void *user_env)
 {
@@ -78,7 +77,7 @@ int main(void) {
 
   while (1)
   {
-    DWT_Delay_ms(2000);
+    DWT_Delay_ms64(100000);
     voltage += 1.0;
     if (voltage > MAX_VOLTAGE)
       voltage = MIN_VOLTAGE;

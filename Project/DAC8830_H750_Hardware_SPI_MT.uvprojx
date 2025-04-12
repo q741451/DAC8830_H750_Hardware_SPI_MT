@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32H750xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CMSIS\CoreSupport;..\CMSIS\DeviceSupport;..\Project;..\STM32H7xx_HAL_Driver\Inc;..\User\DWT;..\User\LED;..\User\KEY;..\User\EXTI;..\User\usart;..\User\stm32h7xx_it;..\User\system;..\User\usart;..\User\gpio;..\User\spi;..\User\dac8830</IncludePath>
+              <IncludePath>..\CMSIS\CoreSupport;..\CMSIS\DeviceSupport;..\Project;..\STM32H7xx_HAL_Driver\Inc;..\User\DWT;..\User\LED;..\User\KEY;..\User\EXTI;..\User\MT;..\User\usart;..\User\stm32h7xx_it;..\User\system;..\User\usart;..\User\gpio;..\User\spi;..\User\dac8830</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -396,6 +396,11 @@
               <FileType>1</FileType>
               <FilePath>..\CMSIS\DeviceSupport\system_stm32h7xx.c</FilePath>
             </File>
+            <File>
+              <FileName>MT_Procedure.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\MT_Procedure.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -445,6 +450,11 @@
               <FileName>exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\EXTI\exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>MT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\MT\MT.c</FilePath>
             </File>
           </Files>
         </Group>
