@@ -28,6 +28,7 @@
 //-----------------------------------------------------------------
 #include "dac8830.h"
 #include "key.h"
+#include "exti.h"
 #include "LED.h"
 #include "system.h"
 #include "DWT.h"
@@ -45,49 +46,24 @@ int main(void) {
   MPU_Memory_Protection(); // 设置保护区域
   SystemClock_Config();    // 设置系统时钟,400Mhz
   DWT_Init();
-  BSP_KEY_Init(BUTTON_KEY1);
-  BSP_KEY_Init(BUTTON_KEY2);
+  // BSP_KEY_Init(BUTTON_KEY1);
+  // BSP_KEY_Init(BUTTON_KEY2);
+	EXTI_Init();
   LED_Init();              // 初始化LED
   DAC8830_Init();
 
   DAC8830_Set_Direct_Current(voltage, DAC8830_CS1 | DAC8830_CS2);
 
-  LED_B_OFF;
-  LED_G_OFF;
-  LED_R_ON;
-
-  while(KEY_get(0) != KEY1_PRES);
-
-  LED_B_ON;
-  LED_G_OFF;
-  LED_R_ON;
-  
-  while (1) {
-    switch (KEY_get(0)) {
-    case KEY1_PRES:
-      voltage += 1.0;
-      if (voltage > MAX_VOLTAGE) {
-        voltage = MIN_VOLTAGE;
-      }
-      break;
-    case KEY2_PRES:
-      voltage -= 1.0;
-      if (voltage < MIN_VOLTAGE) {
-        voltage = MAX_VOLTAGE;
-      }
-      break;
-    case KEY3_PRES:
-      goto end;
-    }
+  while (1)
+	{
+		DWT_Delay_ms(2000);
+    voltage += 1.0;
+    if (voltage > MAX_VOLTAGE)
+      voltage = MIN_VOLTAGE;
 
     DAC8830_Set_Direct_Current(voltage, DAC8830_CS1);
   }
 
-end:
-  LED_B_OFF;
-  LED_G_ON;
-  LED_R_OFF;
-  while(1){}
 }
 
 //-----------------------------------------------------------------

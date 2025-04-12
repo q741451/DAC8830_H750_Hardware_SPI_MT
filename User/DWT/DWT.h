@@ -9,6 +9,8 @@ extern "C" {
 
 void DWT_Init(void);
 
+void DWT_Delay_ms(uint32_t ms);
+
 void DWT_Delay_us(uint32_t us);
 
 void DWT_Delay_ns(uint32_t ns);

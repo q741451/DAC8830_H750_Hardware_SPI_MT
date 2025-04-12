@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32H750xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CMSIS\CoreSupport;..\CMSIS\DeviceSupport;..\Project;..\STM32H7xx_HAL_Driver\Inc;..\User\DWT;..\User\LED;..\User\KEY;..\User\usart;..\User\stm32h7xx_it;..\User\system;..\User\usart;..\User\gpio;..\User\spi;..\User\dac8830</IncludePath>
+              <IncludePath>..\CMSIS\CoreSupport;..\CMSIS\DeviceSupport;..\Project;..\STM32H7xx_HAL_Driver\Inc;..\User\DWT;..\User\LED;..\User\KEY;..\User\EXTI;..\User\usart;..\User\stm32h7xx_it;..\User\system;..\User\usart;..\User\gpio;..\User\spi;..\User\dac8830</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -440,6 +440,11 @@
               <FileName>DWT.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\DWT\DWT.c</FilePath>
+            </File>
+            <File>
+              <FileName>exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\EXTI\exti.c</FilePath>
             </File>
           </Files>
         </Group>
