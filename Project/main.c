@@ -49,33 +49,33 @@ int main(void) {
   DWT_Init();
   BSP_KEY_Init(BUTTON_KEY1);
   EXTI_Init(EXTI_KEY1);
-	EXTI_Register(EXTI_KEY1, call_back_btn1, NULL);
+  EXTI_Register(EXTI_KEY1, call_back_btn1, NULL);
   LED_Init();              // 初始化LED
   DAC8830_Init();
 
-	// 红 - 停止
+  // 红 - 停止
   LED_R_ON;
   LED_G_OFF;
   LED_B_OFF;
-	
-	DAC8830_Set_Direct_Current(0, DAC8830_CS1 | DAC8830_CS2);
+  
+  DAC8830_Set_Direct_Current(0, DAC8830_CS1 | DAC8830_CS2);
   
   while(KEY_get(0) != KEY1_PRES);  // 等待开始
   
-	// 红蓝 - 正在工作
+  // 红蓝 - 正在工作
   LED_R_ON;
   LED_G_OFF;
   LED_B_ON;
 
-	MT_Procedure1();
+  MT_Procedure1();
   MT_Procedure2();
 
-	// 绿 - 已完成
+  // 绿 - 已完成
   LED_R_OFF;
   LED_G_ON;
   LED_B_OFF;
 
-	while(1){}
+  while(1){}
 }
 
 // 中断暂时不用，也未记录时间消除抖动
