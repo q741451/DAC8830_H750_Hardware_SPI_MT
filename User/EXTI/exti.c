@@ -1,21 +1,3 @@
-//-----------------------------------------------------------------
-// 程序描述:
-//      外部中断驱动程序
-// 作    者: 凌智电子
-// 开始日期: 2020-11-11
-// 完成日期: 2020-11-11
-// 修改日期: 
-// 当前版本: V1.0
-// 历史版本:
-//  - V1.0: (2020-11-11)外部中断初始化，中断时执行相应的事情
-// 调试工具: 凌智STM32H750核心板、LZE_ST_LINK2
-// 说    明: 通过按键来实现外部中断，每按一次按键就会触发一次中断；
-//
-//-----------------------------------------------------------------
-
-//-----------------------------------------------------------------
-// 头文件包含
-//-----------------------------------------------------------------
 #include "exti.h"
 #include "DWT.h"
 //-----------------------------------------------------------------
@@ -40,22 +22,22 @@ void EXTI_Init(uint32_t keyMask)
   
   if(keyMask & EXTI_KEY1)
   {
-    HAL_NVIC_SetPriority(EXTI0_IRQn,1,0);
+    HAL_NVIC_SetPriority(EXTI0_IRQn,2,2);
     HAL_NVIC_EnableIRQ(EXTI0_IRQn);
   }
   if(keyMask & EXTI_KEY2)
   {
-    HAL_NVIC_SetPriority(EXTI1_IRQn,1,1);
+    HAL_NVIC_SetPriority(EXTI1_IRQn,2,2);
     HAL_NVIC_EnableIRQ(EXTI1_IRQn);
   }
   if(keyMask & EXTI_KEY3)
   {
-    HAL_NVIC_SetPriority(EXTI2_IRQn,2,0);
+    HAL_NVIC_SetPriority(EXTI2_IRQn,2,2);
     HAL_NVIC_EnableIRQ(EXTI2_IRQn);
   }
   if(keyMask & EXTI_KEY4)
   {
-    HAL_NVIC_SetPriority(EXTI3_IRQn,2,1);
+    HAL_NVIC_SetPriority(EXTI3_IRQn,2,2);
     HAL_NVIC_EnableIRQ(EXTI3_IRQn);
   }
 }
@@ -136,7 +118,3 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       break;
   }
 }
-
-//-----------------------------------------------------------------
-// End Of File
-//-----------------------------------------------------------------
