@@ -18,7 +18,7 @@ void MT_setCParm(MT_CTX *ctx, double c_parm)
 
 void MT_setForce(MT_CTX *ctx, double force)
 {
-  DAC8830_Set_Direct_Current(force * ctx->c_parm_ratio, ctx->cs_mask);
+  DAC8830_Set_Direct_Current(force * ctx->c_parm_ratio + (0.05863747 * 5), ctx->cs_mask);
 }
 
 void MT_runForceLoading(MT_CTX *ctx, double forceFrom, double forceTo, double loadingRate)
