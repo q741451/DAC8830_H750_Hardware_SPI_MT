@@ -456,6 +456,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\MT\MT.c</FilePath>
             </File>
+            <File>
+              <FileName>MT_Force.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\MT\MT_Force.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

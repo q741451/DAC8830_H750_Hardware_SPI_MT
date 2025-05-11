@@ -1,4 +1,5 @@
 #include "MT.h"
+#include "MT_Force.h"
 #include "dac8830.h"
 #include "DWT.h"
 
@@ -13,12 +14,17 @@ void MT_init(MT_CTX *ctx)
 
 void MT_setCParm(MT_CTX *ctx, double c_parm)
 {
-  ctx->c_parm_ratio = 1 / c_parm * 5;
+  ctx->c_parm_ratio = 1 / c_parm;
+}
+
+void MT_setCurrent(MT_CTX *ctx, double current)
+{
+  DAC8830_Set_Direct_Current(current * 5, ctx->cs_mask);
 }
 
 void MT_setForce(MT_CTX *ctx, double force)
 {
-  DAC8830_Set_Direct_Current(force * ctx->c_parm_ratio + (0.05863747 * 5), ctx->cs_mask);
+  MT_setCurrent(ctx, MT_Force_GetCurrent(force * ctx->c_parm_ratio));
 }
 
 void MT_runForceLoading(MT_CTX *ctx, double forceFrom, double forceTo, double loadingRate)
