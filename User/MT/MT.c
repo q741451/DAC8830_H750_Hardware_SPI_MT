@@ -19,7 +19,8 @@ void MT_setCParm(MT_CTX *ctx, double c_parm)
 
 void MT_setCurrent(MT_CTX *ctx, double current)
 {
-  DAC8830_Set_Direct_Current(current * 5, ctx->cs_mask);
+	// 0.962268735 deviation
+  DAC8830_Set_Direct_Current(current * 5.0 * 0.962268735, ctx->cs_mask);
 }
 
 void MT_setForce(MT_CTX *ctx, double force)
