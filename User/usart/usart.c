@@ -20,7 +20,11 @@
 #include "string.h"
 //-----------------------------------------------------------------
 
-u8 USART_RX_BUF[USART_REC_LEN]; // 接收缓冲,最大USART_REC_LEN个字节.
+u8 USART_RX_BUF[USART_REC_LINE_CNT][USART_REC_LINE_LEN];
+volatile u8 USART_RX_CUR_LINE_CNT  = 0;
+volatile u8 USART_RX_CUR_LINE_LEN  = 0;
+volatile u8 USART_RX_CUR_READ_LINE = 0;
+
 u16 USART_RX_STA = 0; // 接收状态标记（bit15：接收完成标志  bit14：接收到0x0d
                       // bit13~0：接收到的有效字节数目）
 u8 aRxBuffer[RXBUFFERSIZE];      // HAL库使用的串口接收缓冲
@@ -95,30 +99,34 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
 // 注意事项: 无
 //
 //-----------------------------------------------------------------
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart->Instance == USARTx) // 如果是串口1
-  {
-    if ((USART_RX_STA & 0x8000) == 0) // 接收未完成
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	u8 byte = 0;
+	
+	if(huart->Instance!=USARTx) return;
+	
+	byte = aRxBuffer[0];
+	
+	if(byte=='\r')
+	{
+    u8 next = (USART_RX_CUR_LINE_CNT + 1) % USART_REC_LINE_CNT;
+    if(next == USART_RX_CUR_READ_LINE)
     {
-      if (USART_RX_STA & 0x4000) // 接收到了0x0d
-      {
-        if (aRxBuffer[0] != 0x0a) // 接收错误,重新开始
-          USART_RX_STA = 0;
-        else // 接收完成了
-          USART_RX_STA |= 0x8000;
-      } else // 还没收到0X0D
-      {
-        if (aRxBuffer[0] == 0x0d)
-          USART_RX_STA |= 0x4000;
-        else {
-          USART_RX_BUF[USART_RX_STA & 0X3FFF] = aRxBuffer[0];
-          USART_RX_STA++;
-          if (USART_RX_STA > (USART_REC_LEN - 1))
-            USART_RX_STA = 0; // 接收数据错误,重新开始接收
-        }
-      }
+        USART_RX_CUR_LINE_LEN = 0;
+        return;
     }
-  }
+    USART_RX_BUF[USART_RX_CUR_LINE_CNT][USART_RX_CUR_LINE_LEN] = '\0';
+    USART_RX_CUR_LINE_CNT = next;
+    USART_RX_CUR_LINE_LEN = 0;
+	}
+	else
+	{
+		if(USART_RX_CUR_LINE_LEN < USART_REC_LINE_LEN - 1)
+		{
+			USART_RX_BUF[USART_RX_CUR_LINE_CNT][USART_RX_CUR_LINE_LEN] = byte;
+			USART_RX_CUR_LINE_LEN++;
+		}
+	}
 }
 
 //-----------------------------------------------------------------
@@ -131,34 +139,28 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 // 注意事项: 无
 //
 //-----------------------------------------------------------------
-void USART1_IRQHandler(void) {
-  u32 timeout = 0;
-  u32 maxDelay = 0x1FFFF;
+void USART1_IRQHandler(void)                	
+{ 
+	HAL_UART_IRQHandler(&UART_Handler);
 
-  HAL_UART_IRQHandler(&UART_Handler); // 调用HAL库中断处理公用函数
+	HAL_UART_Receive_IT(&UART_Handler, (u8 *)aRxBuffer, RXBUFFERSIZE);
+}
 
-  timeout = 0;
-  while (HAL_UART_GetState(&UART_Handler) != HAL_UART_STATE_READY) // 等待就绪
-  {
-    timeout++; // 超时处理
-    if (timeout > maxDelay)
-      break;
-  }
-
-  timeout = 0;
-  // 一次处理完成之后，重新开启中断并设置RxXferCount为1
-  while (HAL_UART_Receive_IT(&UART_Handler, (u8 *)aRxBuffer, RXBUFFERSIZE) !=
-         HAL_OK) {
-    timeout++; // 超时处理
-    if (timeout > maxDelay)
-      break;
-  }
+u8 USART_RX_Try_ReadLine(u8 *out_buf)
+{
+	if(USART_RX_CUR_READ_LINE == USART_RX_CUR_LINE_CNT)
+		return 0;
+	
+  memcpy((char*)out_buf, (char*)USART_RX_BUF[USART_RX_CUR_READ_LINE], USART_REC_LINE_LEN);
+	
+	USART_RX_CUR_READ_LINE = (USART_RX_CUR_READ_LINE + 1) % USART_REC_LINE_CNT;
+	return 1;
 }
 
 //-----------------------------------------------------------------
 // 加入以下代码,支持printf函数
 //-----------------------------------------------------------------
-#if 1
+#if 0
 #pragma import(__use_no_semihosting)
 // 标准库需要的支持函数
 struct __FILE {

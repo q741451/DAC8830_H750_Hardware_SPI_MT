@@ -18,10 +18,15 @@
 //-----------------------------------------------------------------
 // 宏定义和变量声明
 //-----------------------------------------------------------------
-#define USART_REC_LEN  	200  							// 定义最大接收字节数 200
-	  	
-extern u8  USART_RX_BUF[USART_REC_LEN];  	// 接收缓冲,最大USART_REC_LEN个字节.末字节为换行符 
-extern u16 USART_RX_STA;         				 	// 接收状态标记	
+#define USART_DEF_BOUND  	115200
+
+#define USART_REC_LINE_CNT  	16
+#define USART_REC_LINE_LEN  	32
+
+extern u8 USART_RX_BUF[USART_REC_LINE_CNT][USART_REC_LINE_LEN];  	// 接收缓冲
+volatile extern u8 USART_RX_CUR_LINE_CNT;
+volatile extern u8 USART_RX_CUR_LINE_LEN;
+volatile extern u8 USART_RX_CUR_READ_LINE;
 extern UART_HandleTypeDef UART_Handler; 	// UART句柄
 
 #define RXBUFFERSIZE   1 									// 缓存大小
@@ -49,6 +54,8 @@ extern u8 aRxBuffer[RXBUFFERSIZE];			 	// HAL库USART接收Buffer
 //-----------------------------------------------------------------
 // 外部函数声明
 //-----------------------------------------------------------------
+u8 USART_RX_Try_ReadLine(u8 *out_buf);
+
 extern void uart_init(u32 bound);
 //-----------------------------------------------------------------
 #endif

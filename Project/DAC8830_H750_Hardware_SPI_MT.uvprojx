@@ -401,6 +401,11 @@
               <FileType>1</FileType>
               <FilePath>.\MT_Procedure.c</FilePath>
             </File>
+            <File>
+              <FileName>USART_Loop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USART_Loop.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -460,6 +465,11 @@
               <FileName>MT_Force.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\MT\MT_Force.c</FilePath>
+            </File>
+            <File>
+              <FileName>MT_USART.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\MT\MT_USART.c</FilePath>
             </File>
           </Files>
         </Group>
